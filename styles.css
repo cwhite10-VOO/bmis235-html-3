@@ -10,8 +10,8 @@
    ===================================================================== */
 
 body {
-    font-family: Georgia, "Times New Roman", serif;
-    background-color: #f4efe6;
+    font-family: Georgia, "Comic Sans MS", serif;
+    background-color: #FBFAF5;
     color: #2b2b2b;
     margin: 0;
     padding: 0 20px 40px 20px;
@@ -19,7 +19,7 @@ body {
 
 /* the menu at the top of every page */
 nav {
-    background-color: #2b5d8c;
+    background-color: #FFC2185B;
     padding: 14px;
     text-align: center;
 }

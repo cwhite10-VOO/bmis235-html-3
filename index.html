@@ -36,7 +36,391 @@
      This box is empty on purpose. In Part 7 you paste an interactive
      graphic BETWEEN the opening <div> and the closing </div> below.
      ===================================================================== -->
-<div class="showcase"></div>
+<div class="showcase"><!-- HTML: the graph's heading, filter buttons, bar list and the detail box that shows what you tap -->
+2
+<div class="showcase-graph">
+3
+  <h2 class="showcase-title">Popular hobbies in America</h2>
+4
+  <div class="showcase-controls">
+5
+    <button type="button" class="showcase-btn showcase-active" data-mode="popular">Most popular</button>
+6
+    <button type="button" class="showcase-btn" data-mode="alpha">A to Z</button>
+7
+    <button type="button" class="showcase-btn" data-mode="mine">My 3 hobbies</button>
+8
+  </div>
+9
+  <div class="showcase-bars"></div>
+10
+  <p class="showcase-detail">Tap a bar to learn more.</p>
+11
+</div>
+12
+
+13
+<!-- CSS: colors, font and layout for the graph. Every rule starts with .showcase so it can't touch the rest of the page -->
+14
+<style>
+15
+.showcase .showcase-graph {
+16
+  max-width: 600px;
+17
+  margin: 20px auto;
+18
+  padding: 16px;
+19
+  box-sizing: border-box;
+20
+  background: #000000;
+21
+  color: #FFFFFF;
+22
+  border: 3px solid #008080;
+23
+  border-radius: 12px;
+24
+  font-family: "Comic Sans MS", "Comic Sans", cursive;
+25
+}
+26
+.showcase .showcase-title {
+27
+  margin: 0 0 10px 0;
+28
+  font-size: 20px;
+29
+  text-align: center;
+30
+  color: #FFFFFF;
+31
+}
+32
+.showcase .showcase-controls {
+33
+  display: flex;
+34
+  flex-wrap: wrap;
+35
+  gap: 6px;
+36
+  justify-content: center;
+37
+  margin-bottom: 12px;
+38
+}
+39
+.showcase .showcase-btn {
+40
+  font-family: inherit;
+41
+  font-size: 14px;
+42
+  padding: 6px 12px;
+43
+  background: #000000;
+44
+  color: #FFFFFF;
+45
+  border: 2px solid #008080;
+46
+  border-radius: 20px;
+47
+  cursor: pointer;
+48
+}
+49
+.showcase .showcase-btn:hover { background: #0a3d3d; }
+50
+.showcase .showcase-btn.showcase-active {
+51
+  background: #008080;
+52
+  color: #FFFFFF;
+53
+}
+54
+.showcase .showcase-bars { min-height: 260px; }
+55
+.showcase .showcase-row {
+56
+  display: flex;
+57
+  align-items: center;
+58
+  gap: 8px;
+59
+  width: 100%;
+60
+  margin: 0 0 6px 0;
+61
+  padding: 2px 0;
+62
+  background: none;
+63
+  border: none;
+64
+  color: #FFFFFF;
+65
+  font-family: inherit;
+66
+  font-size: 13px;
+67
+  text-align: left;
+68
+  cursor: pointer;
+69
+}
+70
+.showcase .showcase-label { flex: 0 0 96px; }
+71
+.showcase .showcase-track {
+72
+  display: block;
+73
+  flex: 1;
+74
+  height: 20px;
+75
+  background: #1a1a1a;
+76
+  border-radius: 10px;
+77
+  overflow: hidden;
+78
+}
+79
+.showcase .showcase-fill {
+80
+  display: block;
+81
+  height: 100%;
+82
+  min-width: 6px;
+83
+  background: #008080;
+84
+  border-radius: 10px;
+85
+  transition: width 0.5s ease, background 0.2s;
+86
+}
+87
+.showcase .showcase-row.showcase-mine .showcase-fill { background: #FFFFFF; }
+88
+.showcase .showcase-row.showcase-dim { opacity: 0.3; }
+89
+.showcase .showcase-row.showcase-selected .showcase-label { color: #4fd1c5; font-weight: bold; }
+90
+.showcase .showcase-row:focus-visible { outline: 2px solid #FFFFFF; outline-offset: 2px; }
+91
+.showcase .showcase-num { flex: 0 0 28px; text-align: right; }
+92
+.showcase .showcase-detail {
+93
+  min-height: 40px;
+94
+  margin: 10px 0 0 0;
+95
+  max-width: none;
+96
+  font-size: 14px;
+97
+  line-height: 1.4;
+98
+  text-align: center;
+99
+  color: #FFFFFF;
+100
+}
+101
+@media (prefers-reduced-motion: reduce) {
+102
+  .showcase .showcase-fill { transition: none; }
+103
+}
+104
+</style>
+105
+
+106
+<!-- JavaScript: holds the hobby data, draws the bars, handles the buttons and shows details when a bar is clicked -->
+107
+<script>
+108
+(function () {
+109
+  var root = document.querySelector(".showcase");
+110
+  var barsBox = root.querySelector(".showcase-bars");
+111
+  var detail = root.querySelector(".showcase-detail");
+112
+  var buttons = root.querySelectorAll(".showcase-btn");
+113
+
+114
+  // Popularity score from 0 to 100. These are rough, illustrative numbers.
+115
+  // Replace them with figures from a source you cite before you present this as fact.
+116
+  var hobbies = [
+117
+    { name: "Reading", score: 90, note: "Easy, cheap and done almost anywhere." },
+118
+    { name: "Walking", score: 85, note: "The most common way Americans stay active." },
+119
+    { name: "Cooking", score: 78, note: "Part hobby, part daily life." },
+120
+    { name: "Gardening", score: 66, note: "Big with homeowners of every age." },
+121
+    { name: "Fishing", score: 55, note: "One of my favorites. Tens of millions of Americans fish each year.", mine: true },
+122
+    { name: "Hiking", score: 52, note: "Grew a lot as people looked for time outdoors." },
+123
+    { name: "Video games", score: 50, note: "Played by a big share of all age groups." },
+124
+    { name: "Camping", score: 48, note: "Often pairs well with fishing." },
+125
+    { name: "Drumming", score: 8, note: "One of my favorites. Fewer people do it, but it is a great workout for the mind and body.", mine: true },
+126
+    { name: "Ultimate Frisbee", score: 5, note: "One of my favorites. A small but fast-growing sport.", mine: true }
+127
+  ];
+128
+
+129
+  var mode = "popular";
+130
+  var selected = null;
+131
+
+132
+  function render() {
+133
+    var list = hobbies.slice();
+134
+    if (mode === "alpha") {
+135
+      list.sort(function (a, b) { return a.name.localeCompare(b.name); });
+136
+    } else {
+137
+      list.sort(function (a, b) { return b.score - a.score; });
+138
+    }
+139
+
+140
+    barsBox.innerHTML = "";
+141
+    list.forEach(function (h) {
+142
+      var row = document.createElement("button");
+143
+      row.type = "button";
+144
+      row.className = "showcase-row";
+145
+      if (h.mine) row.className += " showcase-mine";
+146
+      if (mode === "mine" && !h.mine) row.className += " showcase-dim";
+147
+      if (selected === h.name) row.className += " showcase-selected";
+148
+
+149
+      var label = document.createElement("span");
+150
+      label.className = "showcase-label";
+151
+      label.textContent = h.name;
+152
+
+153
+      var track = document.createElement("span");
+154
+      track.className = "showcase-track";
+155
+      var fill = document.createElement("span");
+156
+      fill.className = "showcase-fill";
+157
+      fill.style.width = "0%";
+158
+      track.appendChild(fill);
+159
+
+160
+      var num = document.createElement("span");
+161
+      num.className = "showcase-num";
+162
+      num.textContent = h.score;
+163
+
+164
+      row.appendChild(label);
+165
+      row.appendChild(track);
+166
+      row.appendChild(num);
+167
+
+168
+      row.addEventListener("click", function () {
+169
+        selected = h.name;
+170
+
+
+        detail.textContent = h.name + " (score " + h.score + "/100): " + h.note;
+171
+        render();
+172
+      });
+173
+
+174
+      barsBox.appendChild(row);
+175
+      // set the width after adding the row so the bar animates in
+176
+      setTimeout(function () { fill.style.width = h.score + "%"; }, 20);
+177
+    });
+178
+  }
+179
+
+180
+  buttons.forEach(function (btn) {
+181
+    btn.addEventListener("click", function () {
+182
+      mode = btn.getAttribute("data-mode");
+183
+      buttons.forEach(function (b) { b.classList.remove("showcase-active"); });
+184
+      btn.classList.add("showcase-active");
+185
+      render();
+186
+    });
+187
+  });
+188
+
+189
+  render();
+190
+})();
+191
+</script>
+192
+</div>
 
 <!-- Footer: fill in your name -->
 <footer>Built by Conner White &middot; BMIS 235</footer>
